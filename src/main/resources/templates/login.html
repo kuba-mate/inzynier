@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#loginForm").on("submit", function(event) {
+                event.preventDefault();
+
+                var login = $("#username").val();
+                var password = $("#password").val();
+
+                $.ajax({
+                    url: "/api/validateLogin",
+                    type: "POST",
+                    data: { login: login, haslo: password },
+                    success: function(response) {
+                        if (response) {
+                            $("#loginForm")[0].submit();
+                        } else {
+                            $("#error-message").show();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li><a th:href="@{/login}">Zaloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="login-container">
+    <h2>Logowanie</h2>
+    <form id="loginForm" th:action="@{/login}" method="post" th:object="${client}">
+        <label for="username">Nazwa użytkownika</label>
+        <input type="text" id="username" name="username" th:field="*{login}" required>
+        <label for="password">Hasło</label>
+        <input type="password" id="password" name="password" th:field="*{password}" required>
+        <div id="error-message" style="display:none; color:red;">Niepoprawny login lub hasło.</div>
+        <button type="submit">Zaloguj się</button>
+    </form>
+    <p>Nie masz konta? <a th:href="@{/register}">Zarejestruj się</a></p>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>

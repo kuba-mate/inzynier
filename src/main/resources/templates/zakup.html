@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Rezerwacja Karnetu</title>
+  <link rel="stylesheet" th:href="@{/style_reservation.css}">
+  <script>
+    function validateForm() {
+      var checkboxes = document.querySelectorAll('.agreements input[type="checkbox"]');
+      for (var i = 0; i < checkboxes.length; i++) {
+        if (!checkboxes[i].checked) {
+          alert('Proszę zaznaczyć wszystkie zgody.');
+          return false;
+        }
+      }
+      return true;
+    }
+  </script>
+</head>
+<body>
+<header>
+  <nav>
+    <ul>
+      <li><a th:href="@{/}">Strona główna</a></li>
+      <li><a th:href="@{/karnety}">Karnety</a></li>
+      <li><a th:href="@{/logout}">Wyloguj się</a></li>
+    </ul>
+  </nav>
+</header>
+<div class="container">
+  <main>
+    <h1>REZERWACJA KARNETU</h1>
+    <div class="details">
+      <p><strong>Wybrany przez ciebie karnet:</strong> <span th:text="${selectedTicket.name}">Karnet BOKS SOLO</span></p>
+      <p><strong>Szczegóły karnetu:</strong></p>
+      <p>Data ważności karnetu<br>
+        Od: <span class="date-field" th:text="${validFrom}"></span><br>
+        Do: <span class="date-field" th:text="${validTo}"></span><br>
+      <p><strong>Cena:</strong> <span class="price-field" th:text="${selectedTicket.price + ' zł'}">200 zł</span></p>
+    </div>
+    <div class="agreements">
+      <label><input type="checkbox" name="agreement1"> Wyrażam zgodę na przetwarzanie moich danych osobowych przez siłownię w celu realizacji zamówienia karnetu oraz świadczenia usług związanych z członkostwem zgodnie z Polityką Prywatności.</label><br>
+      <label><input type="checkbox" name="agreement2"> Wyrażam zgodę na otrzymywanie informacji handlowych, promocji oraz ofert specjalnych od siłowni drogą elektroniczną (e-mail, SMS) zgodnie z ustawą z dnia 18 lipca 2002 r. o świadczeniu usług drogą elektroniczną.</label><br>
+      <label><input type="checkbox" name="agreement3"> Oświadczam, że zapoznałem/am się i akceptuję Regulamin siłowni.</label><br>
+      <label><input type="checkbox" name="agreement4"> Wyrażam zgodę na przebywanie na terenie siłowni objętym monitoringiem wizyjnym w celu zapewnienia bezpieczeństwa oraz ochrony mienia.</label>
+    </div>
+    <form th:action="@{'/karnety/' + ${selectedTicket.id} + '/rezerwacja'}" method="post" class="kup-karnet-form" onsubmit="return validateForm()">
+      <input type="hidden" name="ticketId" th:value="${selectedTicket.id}"/>
+      <button type="submit">Zarezerwuj</button>
+    </form>
+  </main>
+</div>
+<footer>
+  <div class="footer-content">
+    <div>Godziny otwarcia: 24/7</div>
+    <div>
+      Kontakt: +48 123 456 789 <br>
+      Koszykowa 86, Warszawa
+    </div>
+  </div>
+</footer>
+</body>
+</html>

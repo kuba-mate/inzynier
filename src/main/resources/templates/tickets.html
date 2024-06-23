@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Oferta</title>
+    <link rel="stylesheet" th:href="@{/style_karnet.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="container">
+    <main>
+        <h1>Oto nasza oferta!</h1>
+
+        <div class="tickets">
+            <div class="ticket" th:each="ticket : ${tickets}">
+                <div class="card">
+                    <h2 th:text="${ticket.name}">KARNET OPEN</h2>
+                    <div class="price" th:text="${ticket.price + 'zł'}">170zł</div>
+                    <div class="description" th:text="${ticket.description}">Opis karnetu...</div>
+                    <form th:if="${session.user != null}" th:action="@{'/karnety/' + ${ticket.id} + '/rezerwacja'}" method="get" class="kup-karnet-form">
+                        <button type="submit">KUP KARNET</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>

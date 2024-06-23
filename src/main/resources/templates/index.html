@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Witaj w Świecie Butów!</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="main-content">
+    <section class="section">
+        <h2>Witaj w klubie</h2>
+        <p>Kładziemy nacisk na profesjonalizm i przyjazną atmosferę, ponieważ tylko w takich warunkach nasi Klubowicze mogą osiągnąć swoje cele! Działamy już od ponad 15 lat, stale dbając o rozwój klubu i starając się spełniać oczekiwania każdego Klubowicza. Nieustannie się rozwijamy, śledzimy najnowsze trendy w branży fitness, ale najważniejsze jest to, że nasze centrum fitness to przede wszystkim ludzie – ci, którzy dbają o to, by każdy czuł się u nas jak najlepiej.</p>
+    </section>
+    <section class="section">
+        <h2>Lokalizacja</h2>
+        <img th:src="@{/map.jpg}" alt="Mapa" style="width:100%;">
+    </section>
+    <section class="section">
+        <h2>Opinie klientów</h2>
+        <p>Wszystko super - Kasia</p>
+        <p>Najwyższy profesjonalizm gorąco polecam - Basia</p>
+        <p>Czuje się tu jak w domu - Asia</p>
+        <p>Niesamowita atmosfera - Kuba</p>
+    </section>
+    <section class="section">
+        <h2>Pójdź krok dalej</h2>
+        <p>Z doświadczenia wiemy, że każda pierwsza wizyta w klubie wiąże się z licznymi postanowieniami i wyrzeczeniami. Powrót do aktywności fizycznej lub rozpoczęcie treningów na siłowni to duże wyzwanie, dlatego pod podanym niżej linkiem znajdziesz dokładną instrukcję jak zacząć przygodę z siłownią.</p>
+        <button th:onclick="|window.location.href='@{/karnety}'|">Sprawdź nasze karnety</button>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>

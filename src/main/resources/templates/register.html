@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejestracja</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#registerForm").on("submit", function(event) {
+                event.preventDefault();
+
+                var login = $("#username").val();
+                var password = $("#password").val();
+                var confirmPassword = $("#confirm-password").val();
+
+                // Walidacja #1: czy hasła są takie same
+                if (password !== confirmPassword) {
+                    $("#error-message").text("Hasła muszą być takie same").show();
+                    return;
+                }
+
+                // Walidacja #2: czy login jest unikalny
+                $.ajax({
+                    url: "/api/checkLogin",
+                    type: "GET",
+                    data: { login: login },
+                    success: function(response) {
+                        if (response) {
+                            $("#error-message").text("Użytkownik z danym loginem już istnieje").show();
+                            $("#username").val("").focus();
+                        } else {
+                            $("#registerForm")[0].submit();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li><a th:href="@{/login}">Zaloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="register-container">
+    <h2>Rejestracja</h2>
+    <form id="registerForm" action="/register" method="post" th:object="${client}">
+        <label for="username">Nazwa użytkownika</label>
+        <input type="text" id="username" name="login" th:field="*{login}" required>
+        <label for="password">Hasło</label>
+        <input type="password" id="password" name="password" th:field="*{password}" required>
+        <label for="confirm-password">Potwierdź hasło</label>
+        <input type="password" id="confirm-password" name="confirm-password" required>
+        <label for="imie">Imię</label>
+        <input type="text" id="imie" name="imie" th:field="*{name}" required>
+        <label for="nazwisko">Nazwisko</label>
+        <input type="text" id="nazwisko" name="nazwisko" th:field="*{lastName}" required>
+        <label for="birthDate">Data urodzenia</label>
+        <input type="date" id="birthDate" name="birthDate" th:field="*{birthDate}" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" th:field="*{email}" required>
+        <label for="numer">Numer telefonu</label>
+        <input type="text" id="numer" name="numer" th:field="*{phoneNumber}" required>
+        <label for="adres">Adres zamieszkania</label>
+        <input type="text" id="adres" name="adres" th:field="*{address}" required>
+        <label>Czy jesteś studentem</label>
+        <div>
+            <input type="radio" id="studentYes" name="isStudent" value="true" th:field="*{isStudent}" required>
+            <label for="studentYes">Tak</label>
+        </div>
+        <div>
+            <input type="radio" id="studentNo" name="isStudent" value="false" th:field="*{isStudent}" required>
+            <label for="studentNo">Nie</label>
+        </div>
+        <div id="error-message" style="display:none; color:red;">tekst</div>
+        <button type="submit">Zarejestruj się</button>
+    </form>
+    <p>Masz już konto? <a th:href="@{/login}">Zaloguj się</a></p>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>
