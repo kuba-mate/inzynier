@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Witaj w Świecie Butów!</title>
+    <title>Witaj w Klubie Fitness!</title>
     <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
@@ -11,8 +11,10 @@
     <nav>
         <ul>
             <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
             <li><a th:href="@{/karnety}">Karnety</a></li>
             <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/konto}">Moje konto</a></li>
             <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
         </ul>
     </nav>
@@ -20,7 +22,7 @@
 
 <main class="main-content">
     <section class="section">
-        <h2>Witaj w klubie</h2>
+        <h2>Witaj w klubie Fitness</h2>
         <p>Kładziemy nacisk na profesjonalizm i przyjazną atmosferę, ponieważ tylko w takich warunkach nasi Klubowicze mogą osiągnąć swoje cele! Działamy już od ponad 15 lat, stale dbając o rozwój klubu i starając się spełniać oczekiwania każdego Klubowicza. Nieustannie się rozwijamy, śledzimy najnowsze trendy w branży fitness, ale najważniejsze jest to, że nasze centrum fitness to przede wszystkim ludzie – ci, którzy dbają o to, by każdy czuł się u nas jak najlepiej.</p>
     </section>
     <section class="section">

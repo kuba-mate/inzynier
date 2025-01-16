@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KARNETY</title>
+    <link rel="stylesheet" th:href="@{/style_admin_tickets.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/admin}">Strona główna</a></li>
+            <li><a th:href="@{/admin/karnet-info}">Karnety</a></li>
+            <li><a th:href="@{/admin/treningi}">Treningi grupowe</a></li>
+            <li><a th:href="@{/admin/trenerzy}">Trenerzy</a></li>
+            <li><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1>KARNETY</h1>
+    <section>
+        <h2>LISTA WSZYSTKICH OBECNYCH KARNETÓW</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAZWA</th>
+                    <th>TYP KARNETU</th>
+                    <th>SZCZEGÓŁY</th>
+                    <th>USUŃ KARNET</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="form : ${forms}">
+                    <td th:text="${form.ticket.id}"></td>
+                    <td th:text="${form.ticket.name}"></td>
+                    <td th:text="${form.ticketType}"></td>
+                    <td><button class="info-button" th:attr="data-id=${form.ticket.id}">Szczegóły</button></td>
+                    <td><button class="delete-button" th:attr="data-id=${form.ticket.id}">Usuń karnet</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="center-button">
+            <button class="add-button">Dodaj karnet</button>
+        </div>
+    </section>
+</main>
+
+<div id="add-ticket-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeAddTicketPopup()">&times;</span>
+        <h2>DODAJ KARNET</h2>
+        <form id="add-ticket-form">
+            <!-- Pola ogólne -->
+            <label for="name">Nazwa:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="price">Cena:</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+
+            <label for="description">Opis:</label>
+            <textarea id="description" name="description" rows="3" required></textarea>
+
+            <label for="type">Typ Karnetu:</label>
+            <select id="type" name="type" required>
+                <option value="" disabled selected>Wybierz typ</option>
+                <option value="GYM">Siłownia</option>
+                <option value="GROUP">Grupowy</option>
+                <option value="INDIVIDUAL">Indywidualny</option>
+            </select>
+
+            <!-- Specyficzne pola -->
+            <div id="sport-type-field" style="display: none;">
+                <label for="sportType">Typ Sportu:</label>
+                <select id="sportType" name="sportType">
+                    <option value="" disabled selected>Wybierz typ sportu</option>
+                    <option value="GYM">Siłownia</option>
+                    <option value="BOX">Boks</option>
+                    <option value="MMA">MMA</option>
+                    <option value="KICKBOXING">Kickboxing</option>
+                    <option value="MARTIAL_ARTS">Sztuki walk</option>
+                </select>
+            </div>
+
+            <div id="entries-field" style="display: none;">
+                <label for="entriesCount">Ilość Wejść:</label>
+                <input type="number" id="entriesCount" name="entriesCount">
+            </div>
+
+            <div id="group-level-field" style="display: none;">
+                <label for="groupLevel">Poziom Grupy:</label>
+                <select id="groupLevel" name="groupLevel">
+                    <option value="" disabled selected>Wybierz poziom grupy</option>
+                    <option>początkujący</option>
+                    <option>średniozaawansowany</option>
+                    <option>zaawansowany</option>
+                </select>
+            </div>
+
+            <div id="students-only-field" style="display: none;">
+                <label for="studentsOnly">Tylko dla studentów:</label>
+                <select id="studentsOnly" name="studentsOnly">
+                    <option value="true">Tak</option>
+                    <option value="false">Nie</option>
+                </select>
+            </div>
+            <button type="submit">Pobierz dodatkowe pola</button>
+            <button type="submit">Zapisz</button>
+        </form>
+    </div>
+</div>
+
+
+<div id="ticket-details-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeTicketDetailsPopup()">&times;</span>
+        <h2>SZCZEGÓŁY KARNETU</h2>
+        <div id="ticket-details">
+            <p><strong>ID:</strong> <span id="details-id"></span></p>
+            <p><strong>Nazwa:</strong> <span id="details-name"></span></p>
+            <p><strong>Typ Karnetu:</strong> <span id="details-type"></span></p>
+            <p><strong>Cena:</strong> <span id="details-price"></span></p>
+            <p><strong>Opis:</strong> <span id="details-description"></span></p>
+
+            <div id="details-sport-type" style="display: none;">
+                <p><strong>Typ sportu:</strong> <span id="details-sport"></span></p>
+            </div>
+            <div id="details-entries" style="display: none;">
+                <p><strong>Ilość wejść:</strong> <span id="details-entries-count"></span></p>
+            </div>
+            <div id="details-group-level" style="display: none;">
+                <p><strong>Poziom grupy:</strong> <span id="details-group-level-info"></span></p>
+            </div>
+            <div id="details-students-only" style="display: none;">
+                <p><strong>Tylko dla studentów:</strong> <span id="details-students"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<footer>
+    <div class="footer-content">
+        <p>Godziny otwarcia: 24/7</p>
+        <p>Kontakt: +48 123 456 789<br>Koszykowa 86, Warszawa</p>
+    </div>
+</footer>
+<script>
+    const addButton = document.querySelector('.add-button');
+    const addPopup = document.getElementById('add-ticket-popup');
+    const addForm = document.getElementById('add-ticket-form');
+    const detailsPopup = document.getElementById('ticket-details-popup');
+
+    const typeSelect = document.getElementById('type');
+    const sportTypeField = document.getElementById('sport-type-field');
+    const entriesField = document.getElementById('entries-field');
+    const groupLevelField = document.getElementById('group-level-field');
+    const studentsOnlyField = document.getElementById('students-only-field');
+
+    addButton.addEventListener('click', () => {
+        addPopup.style.display = 'block';
+    });
+
+    function closeAddTicketPopup() {
+        addPopup.style.display = 'none';
+    }
+
+    function showAdditionalFields() {
+        const selectedType = typeSelect.value;
+
+        sportTypeField.style.display = 'none';
+        entriesField.style.display = 'none';
+        groupLevelField.style.display = 'none';
+        studentsOnlyField.style.display = 'none';
+
+        if (selectedType === 'GYM') {
+            studentsOnlyField.style.display = 'block';
+        } else if (selectedType === 'GROUP') {
+            sportTypeField.style.display = 'block';
+            groupLevelField.style.display = 'block';
+        } else if (selectedType === 'INDIVIDUAL') {
+            sportTypeField.style.display = 'block';
+            entriesField.style.display = 'block';
+        }
+    }
+
+    document.getElementById('add-ticket-form').addEventListener('submit', function (event) {
+        if (event.submitter && event.submitter.innerText === 'Pobierz dodatkowe pola') {
+            event.preventDefault();
+            showAdditionalFields();
+        }
+    });
+
+    addForm.addEventListener('submit', function (event) {
+        if (event.submitter && event.submitter.innerText === 'Zapisz') {
+
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/admin/dodaj-karnet', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Karnet został dodany!');
+                        closeAddTicketPopup();
+                        window.location.reload();
+                    } else {
+                        alert('Wystąpił błąd podczas dodawania karnetu.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding ticket:', error);
+                    alert('Wystąpił błąd podczas dodawania karnetu.');
+                });
+        }
+    });
+
+    document.querySelectorAll('.info-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const ticketId = button.getAttribute('data-id');
+
+            fetch(`/admin/karnet/${ticketId}`)
+                .then(response => response.json())
+                .then(ticket => {
+                    document.getElementById('details-id').innerText = ticket.id;
+                    document.getElementById('details-name').innerText = ticket.name;
+                    document.getElementById('details-type').innerText = ticket.type;
+                    document.getElementById('details-price').innerText = ticket.price;
+                    document.getElementById('details-description').innerText = ticket.description;
+
+                    document.getElementById('details-sport-type').style.display = 'none';
+                    document.getElementById('details-entries').style.display = 'none';
+                    document.getElementById('details-group-level').style.display = 'none';
+                    document.getElementById('details-students-only').style.display = 'none';
+
+                    if (ticket.type === 'INDIVIDUAL' || ticket.type === 'GROUP') {
+                        document.getElementById('details-sport-type').style.display = 'block';
+                        document.getElementById('details-sport').innerText = ticket.sportType;
+                    }
+
+                    if (ticket.type === 'INDIVIDUAL') {
+                        document.getElementById('details-entries').style.display = 'block';
+                        document.getElementById('details-entries-count').innerText = ticket.entriesCount;
+                    }
+
+                    if (ticket.type === 'GROUP') {
+                        document.getElementById('details-group-level').style.display = 'block';
+                        document.getElementById('details-group-level-info').innerText = ticket.groupLevel;
+                    }
+
+                    if (ticket.type === 'GYM') {
+                        document.getElementById('details-students-only').style.display = 'block';
+                        document.getElementById('details-students').innerText = ticket.studentsOnly ? 'Tak' : 'Nie';
+                    }
+
+                    document.getElementById('ticket-details-popup').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching ticket details:', error);
+                    alert('Nie udało się pobrać szczegółów karnetu.');
+                });
+        });
+    });
+
+    function closeTicketDetailsPopup() {
+        document.getElementById('ticket-details-popup').style.display = 'none';
+    }
+
+    const deleteButtons = document.querySelectorAll('.delete-button');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const ticketId = button.getAttribute('data-id');
+            const confirmed = confirm('Czy na pewno chcesz usunąć ten karnet?');
+            if (confirmed) {
+                fetch(`/admin/karnet/${ticketId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        alert('Karnet został usunięty.');
+                        window.location.reload();
+                    })
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

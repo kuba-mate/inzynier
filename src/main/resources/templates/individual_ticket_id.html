@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Karnety</title>
+    <link rel="stylesheet" th:href="@{/style_reservation.css}">
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/konto}">Moje konto</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <main>
+        <h1>ZAKUP KARNETU INDYWIDUALNEGO</h1>
+
+        <p class="info-text">Wybrana dyscyplina:
+            <strong th:each="sport, iterStat : ${dto.sportDisciplines}"
+                    th:text="${sport.name + (!iterStat.last ? ', ' : '')}"></strong>
+        </p>
+
+        <form id="validation-form" th:class="kup-karnet-form" th:if="${session.user != null}" th:action="@{'/karnety/' + ${dto.ticketId} + '/rezerwacja'}" method="get" class="kup-karnet-form">
+            <p class="info-text">Wybierz trenera:</p>
+            <select id="selectedCoach" name="selectedCoach" class="styled-dropdown" required>
+                <option value="" disabled selected>-- Wybierz trenera --</option>
+                <option th:each="coach : ${dto.coaches}" th:value="${coach.id}" th:text="${coach.name} + ' ' + ${coach.lastName}"></option>
+            </select>
+
+            <p class="info-text">Wybierz termin pierwszego treningu:</p>
+            <input type="text" id="trainingDate" name="trainingDate" class="input-field" placeholder="Wybierz datę i godzinę" required>
+
+            <p class="info-text">Napisz jaki jest cel twojego treningu:</p>
+            <textarea id="trainingGoal" rows="4" name="trainingGoal" placeholder="Określ swój cel..." class="input-field"></textarea>
+
+            <button type="button" class="submit-button" onclick="validateAndSubmit()">Przejdź dalej</button>
+        </form>
+
+        <p class="info-note">
+            Ten trening pojawi się w sekcji "Moje konto", a po jego zakończeniu będzie dostępny raport przygotowany przez trenera.
+            <br>
+            Na każdy następny trening będziesz mógł albo prywatnie umówić się z trenerem albo w sekcji "Moje konto" wybrać następne terminy.
+        </p>
+
+    </main>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        flatpickr("#trainingDate", {
+            enableTime: true,
+            noCalendar: false,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            minuteIncrement: 60,
+            defaultHour: 12,
+            minDate: "today",
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+    });
+
+    function validateForm(event) {
+        var selectedCoach = document.getElementById('selectedCoach').value;
+        var trainingDate = document.getElementById('trainingDate').value;
+        var trainingGoal = document.getElementById('trainingGoal').value;
+
+        if (!selectedCoach || !trainingDate || !trainingGoal) {
+        event.preventDefault();
+
+        alert("Wszystkie pola muszą być wypełnione, aby przejść dalej.");
+        return false;
+    }
+
+        return true;
+    }
+
+    document.querySelector('.kup-karnet-form').addEventListener('submit', validateForm);
+
+    async function validateAndSubmit() {
+        const selectedCoach = document.getElementById("selectedCoach").value;
+        const trainingDate = document.getElementById("trainingDate").value;
+        const trainingGoal = document.getElementById("trainingGoal").value;
+
+        if (!selectedCoach || !trainingDate || !trainingGoal) {
+            alert("Wszystkie pola muszą być wypełnione.");
+            return false;
+        }
+
+        try {
+            const response = await fetch(`/karnety/walidacja?selectedCoach=${selectedCoach}&trainingDate=${encodeURIComponent(trainingDate)}`);
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.available) {
+                    document.getElementById("validation-form").submit();
+                } else {
+                    alert("Trener jest zajęty w wybranym terminie.");
+                }
+            } else {
+                alert("Wystąpił błąd podczas sprawdzania dostępności.");
+            }
+        } catch (error) {
+            console.error("Błąd walidacji:", error);
+            alert("Nie udało się sprawdzić dostępności trenera. Spróbuj ponownie później.");
+        }
+
+        return false;
+    }
+
+</script>
+</body>
+</html>

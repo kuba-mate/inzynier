@@ -18,7 +18,9 @@ public class Reservation {
     private Long id;
 
     private LocalDate endDate;
-    private Status status;
+    private Integer numberOfEntriesLeft;
+    private String individualTrainingReport;
+    private String individualTrainingGoals;
 
     @NonNull
     @ManyToOne
@@ -29,5 +31,11 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "ticket_id", nullable = false)
     private Ticket ticket;
+
+    public void decreaseNumberOfEntriesByOne(){
+        numberOfEntriesLeft--;
+    }
+
+
 
 }

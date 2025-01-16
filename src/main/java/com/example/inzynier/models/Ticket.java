@@ -2,6 +2,7 @@ package com.example.inzynier.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -22,7 +23,14 @@ public class Ticket {
     private int price;
     private String description;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
+
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "sport_discipline_id", nullable = false)
+    private SportDiscipline sportDiscipline;
+
+
 
 }

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trenerzy</title>
+    <link rel="stylesheet" th:href="@{/style_admin_coaches.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/admin}">Strona główna</a></li>
+            <li><a th:href="@{/admin/karnet-info}">Karnety</a></li>
+            <li><a th:href="@{/admin/treningi}">Treningi grupowe</a></li>
+            <li><a th:href="@{/admin/trenerzy}">Trenerzy</a></li>
+            <li><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1>Trenerzy</h1>
+    <section>
+        <h2>LISTA WSZYSTKICH OBECNYCH TRENERÓW</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Adres email</th>
+                <th>Lata doświadczenia</th>
+                <th>Profesja</th>
+                <th>Szczegóły</th>
+                <th>Usuń trenera</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="coach : ${coaches}">
+                <td th:text="${coach.id}"></td>
+                <td th:text="${coach.name}"></td>
+                <td th:text="${coach.lastName}"></td>
+                <td th:text="${coach.email}"></td>
+                <td th:text="${coach.yearsOfExperience}"></td>
+                <td th:text="${coach.sportDiscipline.name}"></td>
+                <td><button class="info-button" th:attr="data-id=${coach.id}">Zobacz szczegóły</button></td>
+                <td><button class="delete-button" th:attr="data-id=${coach.id}">Usuń trenera</button></td>
+            </tr>
+            </tbody>
+        </table>
+        <button class="add-button">Dodaj trenera</button>
+    </section>
+</main>
+
+<div id="add-coach-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeAddCoachPopup()">&times;</span>
+        <h2>Dodaj Trenera</h2>
+        <form id="add-coach-form">
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="name">Imię:</label>
+                    <input type="text" id="name" name="coach.name" required>
+
+                    <label for="lastName">Nazwisko:</label>
+                    <input type="text" id="lastName" name="coach.lastName" required>
+
+                    <label for="birthDate">Data urodzenia:</label>
+                    <input type="date" id="birthDate" name="coach.birthDate" required>
+
+                    <label for="email">Adres e-mail:</label>
+                    <input type="email" id="email" name="coach.email" required>
+
+                    <label for="phone">Numer telefonu:</label>
+                    <input type="tel" id="phone" name="coach.phoneNumber" required>
+                </div>
+                <div class="form-column">
+                    <label for="login">Login:</label>
+                    <input type="text" id="login" name="coach.login" required>
+
+                    <label for="password">Hasło:</label>
+                    <input type="password" id="password" name="coach.password" required>
+
+                    <label for="experience">Lata doświadczenia:</label>
+                    <input type="number" id="experience" name="coach.yearsOfExperience" required>
+
+                    <label for="scholarships">Dyplomy:</label>
+                    <textarea id="scholarships" name="coach.scholarships" rows="3"></textarea>
+
+                    <label for="sportType">Profesja:</label>
+                    <select id="sportType" name="sportType" required>
+                        <option value="" disabled selected>Wybierz profesję</option>
+                        <option th:each="discipline : ${sportDisciplines}" th:value="${discipline}" th:text="${discipline}"></option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit">Zapisz</button>
+        </form>
+    </div>
+</div>
+
+<div id="coach-details-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeCoachDetailsPopup()">&times;</span>
+        <h2>Szczegóły Trenera</h2>
+        <div id="coach-details">
+            <p><strong>Imię:</strong> <span id="details-name"></span></p>
+            <p><strong>Nazwisko:</strong> <span id="details-lastName"></span></p>
+            <p><strong>Data urodzenia:</strong> <span id="details-birthDate"></span></p>
+            <p><strong>Email:</strong> <span id="details-email"></span></p>
+            <p><strong>Numer telefonu:</strong> <span id="details-phone"></span></p>
+            <p><strong>Login:</strong> <span id="details-login"></span></p>
+            <p><strong>Lata doświadczenia:</strong> <span id="details-experience"></span></p>
+            <p><strong>Dyplomy:</strong> <span id="details-scholarships"></span></p>
+            <p><strong>Profesja:</strong> <span id="details-sportType"></span></p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p>Godziny otwarcia : 24/7</p>
+        <p>Kontakt: +48 123 456 789 <br>Koszykowa 86, Warszawa</p>
+    </div>
+</footer>
+<script>
+    const addButton = document.querySelector('.add-button');
+    const popup = document.getElementById('add-coach-popup');
+    const form = document.getElementById('add-coach-form');
+
+    addButton.addEventListener('click', () => {
+        popup.style.display = 'block';
+    });
+
+    function closeAddCoachPopup() {
+        popup.style.display = 'none';
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/admin/dodaj-trenera', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('Trener został dodany!');
+                closeAddCoachPopup();
+                window.location.reload();
+            })
+    });
+
+    const infoButtons = document.querySelectorAll('.info-button');
+    const detailsPopup = document.getElementById('coach-details-popup');
+
+    function closeCoachDetailsPopup() {
+        detailsPopup.style.display = 'none';
+    }
+
+    infoButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const coachId = button.getAttribute('data-id');
+
+            fetch(`/admin/trener/${coachId}`)
+                .then(response => response.json())
+                .then(coach => {
+                    document.getElementById('details-name').innerText = coach.name;
+                    document.getElementById('details-lastName').innerText = coach.lastName;
+                    document.getElementById('details-birthDate').innerText = coach.birthDate;
+                    document.getElementById('details-email').innerText = coach.email;
+                    document.getElementById('details-phone').innerText = coach.phoneNumber;
+                    document.getElementById('details-login').innerText = coach.login;
+                    document.getElementById('details-experience').innerText = coach.yearsOfExperience;
+                    document.getElementById('details-scholarships').innerText = coach.scholarships;
+                    document.getElementById('details-sportType').innerText = coach.sportDiscipline;
+
+                    detailsPopup.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching coach details:', error);
+                    alert('Nie udało się pobrać szczegółów trenera.');
+                });
+        });
+    });
+
+    const deleteButtons = document.querySelectorAll('.delete-button');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const coachId = button.getAttribute('data-id');
+            const confirmed = confirm('Czy na pewno chcesz usunąć tego trenera?');
+            if (confirmed) {
+                fetch(`/admin/trener/${coachId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        alert('Trener został usunięty.');
+                        window.location.reload();
+                    })
+            }
+        });
+    });
+</script>
+</body>
+</html>

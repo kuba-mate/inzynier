@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Moje konto</title>
+    <link rel="stylesheet" th:href="@{/style_account.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li><a th:href="@{/konto}">Moje konto</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+<h1>Moje konto</h1>
+<div class="container">
+
+    <div class="left-column">
+    <div class="personal-data">
+        <h2>Dane osobowe</h2>
+        <p>Imię: <strong th:text="${dto.client.name}"></strong></p>
+        <p>Nazwisko: <strong th:text="${dto.client.lastName}"></strong></p>
+        <p>Data urodzenia: <strong th:text="${dto.client.birthDate}"></strong></p>
+        <p>Numer telefonu: <strong th:text="${dto.client.phoneNumber}"></strong></p>
+        <p>Adres e-mail: <strong th:text="${dto.client.email}"></strong></p>
+        <p>Adres zamieszkania: <strong th:text="${dto.client.address}"></strong></p>
+        <p>Status studenta:
+            <strong th:text="${dto.client.isStudent} ? 'Tak' : 'Nie'"></strong>
+        </p>
+        <button class="edit-profile-button" onclick="openPopup()">Edycja profilu</button>
+    </div>
+
+    <div class="training-plans">
+        <h2>Moje obecne plany treningowe:</h2>
+        <div th:each="planA : ${dto.currentPlans.nonPeriodicReservations}">
+            <p>
+                Karnet: <strong th:text="${planA.ticket.name}"></strong>
+            </p>
+            <p>
+                Pozostały ci
+                <strong th:text="${planA.numberOfEntriesLeft}"></strong>
+                wejścia
+            </p>
+            <div class="button-group">
+                <button th:attr="data-raport-text=${planA.individualTrainingReport}" onclick="openRaportPopupFromElement(this)">Pokaż raport</button>
+                <button th:attr="data-goal-text=${planA.individualTrainingGoals}" onclick="openGoalPopupFromElement(this)">Pokaż cel</button>
+            </div>
+        </div>
+        <div th:each="planB : ${dto.currentPlans.gymReservations}">
+            <p>
+                Karnet: <strong th:text="${planB.ticket.name}"></strong> jest dostępny do <strong th:text="${planB.endDate}"></strong>
+            </p>
+        </div>
+        <div th:each="planC : ${dto.currentPlans.groupReservations}">
+            <p>
+                Karnet: <strong th:text="${planC.ticket.name}"></strong> jest dostępny do <strong th:text="${planC.endDate}"></strong>
+            </p>
+            <p>
+                Trener : <strong th:text="${planC.coach.name}"></strong> <strong th:text="${planC.coach.lastName}"></strong>
+                <p> Treningi w ramach tego karnetu odbywają się w:
+                <div th:each="training : ${planC.groupTrainings}">
+                    <p>
+                        <strong th:text="${training.trainingDay}"></strong> <strong th:text="${training.startHour}"></strong>-<strong th:text="${training.endHour}"></strong>
+                    </p>
+                </div>
+            </p>
+        </div>
+    </div>
+    </div>
+
+    <div class="training-history">
+        <h2>Historyczne Plany Treningowe:</h2>
+        <div th:each="historyPlan : ${dto.historicalPlans.nonPeriodicReservations}">
+            <p>
+                Karnet: <strong th:text="${historyPlan.ticket.name}"></strong>
+            </p>
+            <div class="button-group">
+                <button th:attr="data-raport-text=${historyPlan.individualTrainingReport}" onclick="openRaportPopupFromElement(this)">Pokaż raport</button>
+                <button th:attr="data-goal-text=${historyPlan.individualTrainingGoals}" onclick="openGoalPopupFromElement(this)">Pokaż cel</button>
+            </div>
+        </div>
+        <div th:each="planB : ${dto.historicalPlans.gymReservations}">
+            <p>
+                Karnet: <strong th:text="${planB.ticket.name}"></strong> był dostępny do <strong th:text="${planB.endDate}"></strong>
+            </p>
+        </div>
+        <div th:each="planC : ${dto.historicalPlans.groupReservations}">
+            <p>
+                Karnet: <strong th:text="${planC.ticket.name}"></strong> był dostępny do <strong th:text="${planC.endDate}"></strong>
+            </p>
+            <p>
+                Trener : <strong th:text="${planC.coach.name}"></strong> <strong th:text="${planC.coach.lastName}"></strong>
+        </div>
+    </div>
+</div>
+
+<div id="edit-profile-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closePopup()">&times;</span>
+        <h2>Edytuj Profil</h2>
+        <form id="edit-profile-form">
+            <label for="login">Login:</label>
+            <input type="text" id="login" name="login" th:value="${dto.client.login}">
+
+            <label for="password">Hasło:</label>
+            <input type="password" id="password" name="password" th:value="${dto.client.password}">
+
+            <label for="phoneNumber">Numer telefonu:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" th:value="${dto.client.phoneNumber}">
+
+            <label for="email">Adres e-mail:</label>
+            <input type="email" id="email" name="email" th:value="${dto.client.email}">
+
+            <label for="address">Adres zamieszkania:</label>
+            <input type="text" id="address" name="address" th:value="${dto.client.address}">
+
+            <button type="submit" th:onclick="|window.location.href='@{/konto}'|">Zapisz</button>
+        </form>
+    </div>
+</div>
+
+<div id="clients-goal-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeGoalPopup()">&times;</span>
+        <h2>Cel Klienta</h2>
+        <textarea id="goal-text" readonly rows="10" cols="30"></textarea>
+        <button onclick="closeGoalPopup()">Zamknij</button>
+    </div>
+</div>
+
+<div id="clients-raport-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeRaportPopup()">&times;</span>
+        <h2>Raport treningowy</h2>
+        <textarea id="raport-text" readonly rows="10" cols="30"></textarea>
+        <button onclick="closeRaportPopup()">Zamknij</button>
+    </div>
+</div>
+
+
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+<script>
+    function openPopup() {
+        document.getElementById('edit-profile-popup').style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('edit-profile-popup').style.display = 'none';
+    }
+
+    function openGoalPopupFromElement(button) {
+        const goalText = button.getAttribute('data-goal-text');
+
+        document.getElementById('goal-text').value = goalText;
+
+        document.getElementById('clients-goal-popup').style.display = 'block';
+    }
+
+
+    function closeGoalPopup() {
+        document.getElementById('clients-goal-popup').style.display = 'none';
+    }
+
+    function openRaportPopupFromElement(button) {
+        const raportText = button.getAttribute('data-raport-text');
+
+        document.getElementById('raport-text').value = raportText;
+
+        document.getElementById('clients-raport-popup').style.display = 'block';
+    }
+
+
+    function closeRaportPopup() {
+        document.getElementById('clients-raport-popup').style.display = 'none';
+    }
+
+
+    document.getElementById('edit-profile-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/edycja-profilu', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('Profil zaktualizowany!');
+                closePopup();
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+</body>
+</html>

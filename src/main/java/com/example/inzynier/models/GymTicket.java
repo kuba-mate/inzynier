@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "gymTicket")
-public class GymTicket extends Ticket{
+public class GymTicket extends Ticket {
 
     private boolean onlyStudent;
 

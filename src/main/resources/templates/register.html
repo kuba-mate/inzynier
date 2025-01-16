@@ -15,13 +15,11 @@
                 var password = $("#password").val();
                 var confirmPassword = $("#confirm-password").val();
 
-                // Walidacja #1: czy hasła są takie same
                 if (password !== confirmPassword) {
                     $("#error-message").text("Hasła muszą być takie same").show();
                     return;
                 }
 
-                // Walidacja #2: czy login jest unikalny
                 $.ajax({
                     url: "/api/checkLogin",
                     type: "GET",
@@ -44,6 +42,7 @@
     <nav>
         <ul>
             <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
             <li><a th:href="@{/karnety}">Karnety</a></li>
             <li><a th:href="@{/login}">Zaloguj się</a></li>
         </ul>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jak zacząć</title>
+    <link rel="stylesheet" th:href="@{/style_how_to_start.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/konto}">Moje konto</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="main-content">
+    <h1>Od czego zacząć</h1>
+    <ol>
+        <li>
+            <p>1. Pierwsza wizyta w klubie, zapraszamy do kontaktu</p>
+            <p>
+                Kontakt:
+                <ul>
+                    <li>Numer telefonu : +48 123 456 789</li>
+                    <li>Adres : Koszykowa 86, Warszawa</li>
+                </ul>
+            </p>
+        </li>
+        <li>
+            <p>2. W ramach opłaty członkowskiej mamy dla ciebie przygotowane kilka atrakcji na start</p>
+            <ul>
+                <li>Gymbook – dziennik każdego ćwiczącego z wytycznymi pierwszymi zajęciami na temat:
+                    <ul>
+                        <li>Instrukcji obsługi maszyn</li>
+                        <li>Analizy zdrowia, jak się ruszać i unikać złych nawyków</li>
+                    </ul>
+                </li>
+                <li>Pomocny start w każdym razie – nie tylko na siłowni – ale także z dietą i trybem życia</li>
+            </ul>
+        </li>
+        <li>
+            <p>3. Niezbędnik każdego trenującego, na każdy trening bierz ze sobą</p>
+            <ul>
+                <li>Ręcznik treningowy</li>
+                <li>Obuwie sportowe (na zmianę)</li>
+                <li>2 litry wody</li>
+                <li>Wodę lub napój izotoniczny</li>
+            </ul>
+        </li>
+        <li>
+            <p>4. Sprawdź naszą ofertę i wybierz ćwiczenia, którymi jesteś zainteresowany</p>
+            <p>
+                Oferta naszego centrum fitness dostępna jest w zakładkach pod nazwą "Oferta". Prowadzimy zajęcia
+                grupowe oraz indywidualne w dziedzinach sportowych oraz ogólnego treningu funkcjonalnego.
+            </p>
+        </li>
+    </ol>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>

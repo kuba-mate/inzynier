@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Karnety</title>
+    <link rel="stylesheet" th:href="@{/styles_silownia.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
+            <li><a th:href="@{/karnety}">Karnety</a></li>
+            <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/konto}">Moje konto</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="container">
+    <main>
+        <h1>Oto nasza oferta!</h1>
+
+        <div class="tickets">
+            <div class="ticket" th:each="ticket : ${tickets}">
+                <div class="card">
+                    <h2 th:text="${ticket.groupTicket.name}"></h2>
+                    <div class="price" th:text= "'Cena : ' + ${ticket.groupTicket.price + 'zł'}"></div>
+                    <div class="description">
+                        <div class="coach">
+                            <strong>Trener:</strong> <span th:text="${ticket.coach.name}"></span> <span th:text="${ticket.coach.lastName}"></span>
+                        </div>
+                        <div class="schedule">
+                            <strong>Godziny treningów:</strong>
+                            <ul>
+                                <li th:each="training : ${ticket.groupTrainings}"
+                                    th:text="${training.trainingDay} + ' ' + ${training.startHour} + '-' + ${training.endHour}">
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="room">
+                            <strong>Sala:</strong> <span th:text="${ticket.room.room_id}"></span> , <strong>poziom treningu:</strong> <span th:text="${ticket.groupTicket.levelOfAdvancement}"></span>
+                        </div>
+                    </div>
+                    <form th:if="${session.user != null}" th:action="@{'/karnety/' + ${ticket.groupTicket.id} + '/rezerwacja'}" method="get" class="kup-karnet-form">
+                        <button type="submit">Kup karnet</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<footer>
+    <div class="footer-content">
+        <div>Godziny otwarcia: 24/7</div>
+        <div>
+            Kontakt: +48 123 456 789 <br>
+            Koszykowa 86, Warszawa
+        </div>
+    </div>
+</footer>
+</body>
+</html>

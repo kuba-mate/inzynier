@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treningi Grupowe</title>
+    <link rel="stylesheet" th:href="@{/style_admin_group_training.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/admin}">Strona główna</a></li>
+            <li><a th:href="@{/admin/karnet-info}">Karnety</a></li>
+            <li><a th:href="@{/admin/treningi}">Treningi grupowe</a></li>
+            <li><a th:href="@{/admin/trenerzy}">Trenerzy</a></li>
+            <li><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1>Treningi grupowe</h1>
+    <section>
+        <h2>LISTA WSZYSTKICH OBECNYCH TRENINGÓW GRUPOWYCH</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Dzień tygodnia</th>
+                    <th>Godziny start-koniec</th>
+                    <th>Trener</th>
+                    <th>Szczegóły</th>
+                    <th>Usuń trening</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="training : ${trainings}">
+                    <td th:text="${training.training_id}"></td>
+                    <td th:text="${training.trainingDay}"></td>
+                    <td th:text="${training.startHour + ' - ' + training.endHour}"></td>
+                    <td th:text="${training.coach.name + ' ' + training.coach.lastName}"></td>
+                    <td><button class="info-button" th:attr="data-id=${training.training_id}">Szczegóły</button></td>
+                    <td><button class="delete-button" th:attr="data-id=${training.training_id}">Usuń trening</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="center-button">
+            <button class="add-button">Dodaj trening</button>
+        </div>
+    </section>
+</main>
+
+<div id="add-training-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeAddTrainingPopup()">&times;</span>
+        <h2>Dodaj Trening</h2>
+        <form id="add-training-form">
+            <div id="step-1">
+                <!-- Krok 1 -->
+                <label for="dayOfWeek">Dzień tygodnia:</label>
+                <select id="dayOfWeek" name="dayOfWeek" required>
+                    <option value="" disabled selected>Wybierz dzień</option>
+                    <option value="poniedziałek">Poniedziałek</option>
+                    <option value="wtorek">Wtorek</option>
+                    <option value="środa">Środa</option>
+                    <option value="czwartek">Czwartek</option>
+                    <option value="piątek">Piątek</option>
+                    <option value="sobota">Sobota</option>
+                    <option value="niedziela">Niedziela</option>
+                </select>
+
+                <label for="startTime">Godzina rozpoczęcia:</label>
+                <input type="time" id="startTime" name="startTime" required>
+
+                <label for="endTime">Godzina zakończenia:</label>
+                <input type="time" id="endTime" name="endTime" required>
+
+                <label for="coachId">Trener:</label>
+                <select id="coachId" name="coachId" required>
+                    <option value="" disabled selected>Wybierz trenera</option>
+                    <option th:each="coach : ${coaches}" th:value="${coach.id}" th:data-discipline="${coach.sportDiscipline.sportType}" th:text="${coach.name + ' ' + coach.lastName}"></option>
+                </select>
+
+                <button type="button" id="next-step">Przejdź dalej</button>
+            </div>
+
+            <div id="step-2" style="display: none;">
+                <label for="room">Sala:</label>
+                <select id="room" name="room" required>
+                    <option value="" disabled selected>Wybierz salę</option>
+                </select>
+
+                <label for="ticketId">Karnet:</label>
+                <select id="ticketId" name="ticketId" required>
+                    <option value="" disabled selected>Wybierz karnet</option>
+                </select>
+
+                <button type="submit" id="save-button">Zapisz</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="training-details-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closeTrainingDetailsPopup()">&times;</span>
+        <h2>Szczegóły Treningu</h2>
+        <div id="training-details">
+            <p><strong>Dzień tygodnia:</strong> <span id="details-dayOfWeek"></span></p>
+            <p><strong>Godzina rozpoczęcia:</strong> <span id="details-startHour"></span></p>
+            <p><strong>Godzina zakończenia:</strong> <span id="details-endHour"></span></p>
+            <p><strong>Trener:</strong> <span id="details-coach"></span></p>
+            <p><strong>Dyscyplina sportowa:</strong> <span id="details-sportDiscipline"></span></p>
+            <p><strong>Sala:</strong> <span id="details-room"></span></p>
+            <p><strong>ID Karnetu:</strong> <span id="details-ticketId"></span></p>
+            <p><strong>Aktualna liczba uczestników:</strong> <span id="details-groupSize"></span></p>
+        </div>
+    </div>
+</div>
+
+
+<footer>
+    <div class="footer-content">
+        <p>Godziny otwarcia : 24/7</p>
+        <p>Kontakt: +48 123 456 789 <br>Koszykowa 86, Warszawa</p>
+    </div>
+</footer>
+<script>
+
+    const deleteButtons = document.querySelectorAll('.delete-button');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const trainingId = button.getAttribute('data-id');
+            const confirmed = confirm('Czy na pewno chcesz usunąć ten trening?');
+            if (confirmed) {
+                fetch(`/admin/trening/${trainingId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        alert('Trening został usunięty.');
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Błąd podczas usuwania treningu:', error);
+                        alert('Nie udało się usunąć treningu.');
+                    });
+            }
+        });
+    });
+
+    const infoButtons = document.querySelectorAll('.info-button');
+    const detailsPopup = document.getElementById('training-details-popup');
+
+    function closeTrainingDetailsPopup() {
+        detailsPopup.style.display = 'none';
+    }
+
+    infoButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const trainingId = button.getAttribute('data-id');
+
+            fetch(`/admin/trening/${trainingId}`)
+                .then(response => response.json())
+                .then(training => {
+                    document.getElementById('details-dayOfWeek').innerText = training.trainingDay;
+                    document.getElementById('details-startHour').innerText = training.startHour;
+                    document.getElementById('details-endHour').innerText = training.endHour;
+                    document.getElementById('details-coach').innerText = training.coach.name + ' ' + training.coach.lastName;
+                    document.getElementById('details-sportDiscipline').innerText = training.sportDiscipline;
+                    document.getElementById('details-room').innerText = training.room;
+                    document.getElementById('details-ticketId').innerText = training.ticket;
+                    document.getElementById('details-groupSize').innerText = training.currentGroupSize;
+
+                    detailsPopup.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Błąd podczas pobierania szczegółów treningu:', error);
+                    alert('Nie udało się pobrać szczegółów treningu.');
+                });
+        });
+    });
+
+    const addButton = document.querySelector('.add-button');
+    const addPopup = document.getElementById('add-training-popup');
+    const closeAddPopupButton = document.querySelector('.close-button');
+
+    function openAddTrainingPopup() {
+        addPopup.style.display = 'block';
+    }
+
+    function closeAddTrainingPopup() {
+        addPopup.style.display = 'none';
+        resetForm();
+    }
+
+    function resetForm() {
+        const form = document.getElementById('add-training-form');
+        form.reset();
+        document.getElementById('step-1').style.display = 'block';
+        document.getElementById('step-2').style.display = 'none';
+    }
+
+    addButton.addEventListener('click', openAddTrainingPopup);
+
+    closeAddPopupButton.addEventListener('click', closeAddTrainingPopup);
+
+    const nextStepButton = document.getElementById('next-step');
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+
+    nextStepButton.addEventListener('click', () => {
+        const selectedCoach = document.getElementById('coachId');
+        const discipline = selectedCoach.options[selectedCoach.selectedIndex].getAttribute('data-discipline');
+        if (discipline) {
+            fetchRooms(discipline);
+            fetchTickets(discipline);
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+        }
+    });
+
+    function fetchRooms(discipline) {
+        fetch(`/admin/pobierz-pokoje?sportType=${discipline}`)
+            .then(response => response.json())
+            .then(rooms => {
+                const roomSelect = document.getElementById('room');
+                roomSelect.innerHTML = '<option value="" disabled selected>Wybierz salę</option>';
+                rooms.forEach(room => {
+                    const option = document.createElement('option');
+                    option.value = room.room_id;
+                    option.textContent = `Numer pokoju: ${room.room_id} , Pojemność: ${room.howManyPeople}`;
+                    roomSelect.appendChild(option);
+                });
+            });
+    }
+
+    function fetchTickets(discipline) {
+        fetch(`/admin/pobierz-karnet?sportType=${discipline}`)
+            .then(response => response.json())
+            .then(tickets => {
+                const ticketSelect = document.getElementById('ticketId');
+                ticketSelect.innerHTML = '<option value="" disabled selected>Wybierz karnet</option>';
+                tickets.forEach(ticket => {
+                    const option = document.createElement('option');
+                    option.value = ticket.id;
+                    option.textContent = `ID:${ticket.id} , ${ticket.name} (Cena: ${ticket.price} zł)`;
+                    ticketSelect.appendChild(option);
+                });
+            });
+    }
+
+    const addTrainingForm = document.getElementById('add-training-form');
+
+    addTrainingForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(addTrainingForm);
+        const data = Object.fromEntries(formData);
+
+        fetch('/admin/dodaj-trening', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Trening został pomyślnie dodany!');
+                    closeAddTrainingPopup();
+                    window.location.reload();
+                } else {
+                    response.text().then(errorMessage => {
+                        alert(`Wystąpił błąd: ${errorMessage}`);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Błąd podczas wysyłania danych:', error);
+                alert('Nie udało się dodać treningu.');
+            });
+    });
+
+</script>
+</body>
+</html>

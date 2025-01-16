@@ -8,6 +8,7 @@ class InzynierApplicationTests {
 
     @Test
     void contextLoads() {
+
     }
 
 }

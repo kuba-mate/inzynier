@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Oferta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karnety</title>
     <link rel="stylesheet" th:href="@{/style_karnet.css}">
 </head>
 <body>
@@ -10,30 +11,43 @@
     <nav>
         <ul>
             <li><a th:href="@{/}">Strona główna</a></li>
+            <li><a th:href="@{/jak-zaczac}">Jak zacząć</a></li>
             <li><a th:href="@{/karnety}">Karnety</a></li>
             <li th:if="${session.user == null}"><a th:href="@{/login}">Zaloguj się</a></li>
+            <li th:if="${session.user != null}"><a th:href="@{/konto}">Moje konto</a></li>
             <li th:if="${session.user != null}"><a th:href="@{/logout}">Wyloguj się</a></li>
         </ul>
     </nav>
 </header>
-<div class="container">
-    <main>
-        <h1>Oto nasza oferta!</h1>
 
-        <div class="tickets">
-            <div class="ticket" th:each="ticket : ${tickets}">
-                <div class="card">
-                    <h2 th:text="${ticket.name}">KARNET OPEN</h2>
-                    <div class="price" th:text="${ticket.price + 'zł'}">170zł</div>
-                    <div class="description" th:text="${ticket.description}">Opis karnetu...</div>
-                    <form th:if="${session.user != null}" th:action="@{'/karnety/' + ${ticket.id} + '/rezerwacja'}" method="get" class="kup-karnet-form">
-                        <button type="submit">KUP KARNET</button>
-                    </form>
-                </div>
+<main>
+    <h2>KARNETY</h2>
+
+    <section class="karnety">
+        <div class="karnet">
+            <div class="intro-text">
+                <p>Zyskaj nielimitowany dostęp do nowoczesnej siłowni wyposażonej w najwyższej jakości sprzęt. Trenuj w dogodnym dla siebie czasie, rozwijaj swoją siłę, wytrzymałość i poprawiaj formę każdego dnia!</p>
             </div>
+            <img th:src="@{/silownia.png}" alt="Siłownia">
+            <button th:onclick="|window.location.href='@{/karnety/silownia}'|">Karnety na siłownię</button>
         </div>
-    </main>
-</div>
+        <div class="karnet">
+            <div class="intro-text">
+                <p>Dołącz do energetycznych zajęć grupowych, prowadzonych przez doświadczonych trenerów. Ciesz się dobrą atmosferą i różnorodnymi treningami, które pomogą Ci osiągnąć Twoje fitnessowe cele!</p>
+            </div>
+            <img th:src="@{/grupowe.png}" alt="Zajęcia grupowe">
+            <button th:onclick="|window.location.href='@{/karnety/grupowe}'|">Karnety na zajęcia grupowe</button>
+        </div>
+        <div class="karnet">
+            <div class="intro-text">
+                <p>Postaw na indywidualne podejście i osiągnij wymarzone efekty dzięki personalizowanym treningom. Pracuj pod okiem profesjonalnego trenera, który dostosuje plan ćwiczeń do Twoich potrzeb, celów i możliwości!</p>
+            </div>
+            <img th:src="@{/indywidualne.png}" alt="Zajęcia indywidualne">
+            <button th:onclick="|window.location.href='@{/karnety/indywidualne}'|">Karnety na zajęcia indywidualne</button>
+        </div>
+    </section>
+</main>
+
 <footer>
     <div class="footer-content">
         <div>Godziny otwarcia: 24/7</div>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje treningi</title>
+    <link rel="stylesheet" th:href="@{/style_coach_trainings.css}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/coach}">Strona główna</a></li>
+            <li><a th:href="@{/coach/moje-treningi}">Moje treningi</a></li>
+            <li><a th:href="@{/logout}">Wyloguj się</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1>Moje treningi</h1>
+    <section>
+        <h2>LISTA WSZYSTKICH OBECNYCH TRENINGÓW</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data</th>
+                    <th>Godzina start-koniec</th>
+                    <th>Sala</th>
+                    <th>Typ treningu</th>
+                    <th>Szczegóły</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="training : ${trainings}">
+                    <td th:text="${training.id}"></td>
+                    <td th:text="${training.date}"></td>
+                    <td th:text="${training.startHour + ' - ' + training.endHour}"></td>
+                    <td th:text="${training.room}"></td>
+                    <td th:text="${training.ticketType}"></td>
+                    <td><button class="details-button" th:attr="data-id=${training.id}">Szczegóły</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div id="details-popup" class="popup">
+    <div class="popup-content">
+        <span class="close-button" onclick="closePopup()">&times;</span>
+        <h2>Szczegóły Treningu</h2>
+
+        <div id="individual-details" style="display: none;">
+            <p><strong>ID:</strong> <span id="popup-id-individual"></span></p>
+            <p><strong>Data:</strong> <span id="popup-date-individual"></span></p>
+            <p><strong>Godzina:</strong> <span id="popup-time-individual"></span></p>
+            <p><strong>Sala:</strong> <span id="popup-room-individual"></span></p>
+            <p><strong>Typ treningu:</strong> <span id="popup-type-individual"></span></p>
+            <p><strong>Klient:</strong> <span id="popup-client"></span></p>
+            <p><strong>Cel klienta:</strong> <span id="popup-goal"></span></p>
+            <p><strong>Pozostała liczba wejść:</strong> <span id="popup-entries"></span></p>
+            <p><strong>Raport trenera:</strong></p>
+            <input type="hidden" id="reservationId">
+            <textarea id="popup-report" rows="4" cols="50"></textarea>
+            <button id="save-report" onclick="saveReport()">Zapisz</button>
+        </div>
+
+        <div id="group-details" style="display: none;">
+            <p><strong>ID:</strong> <span id="popup-id-group"></span></p>
+            <p><strong>Data:</strong> <span id="popup-date-group"></span></p>
+            <p><strong>Godzina:</strong> <span id="popup-time-group"></span></p>
+            <p><strong>Sala:</strong> <span id="popup-room-group"></span></p>
+            <p><strong>Typ treningu:</strong> <span id="popup-type-group"></span></p>
+            <p><strong>Liczność grupy:</strong> <span id="popup-group-size"></span></p>
+            <p><strong>Poziom zaawansowania:</strong> <span id="popup-level"></span></p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p>Godziny otwarcia: 24/7</p>
+        <p>Kontakt: +48 123 456 789<br>Koszykowa 86, Warszawa</p>
+    </div>
+</footer>
+
+<script>
+    const detailsButtons = document.querySelectorAll('.details-button');
+    const popup = document.getElementById('details-popup');
+
+    function closePopup() {
+        popup.style.display = 'none';
+    }
+
+    detailsButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const trainingId = button.getAttribute('data-id');
+            fetch(`/coach/trening/${trainingId}`)
+                .then(response => response.json())
+                .then(training => {
+                    if (training.type === "INDIVIDUAL") {
+                        document.getElementById('popup-id-individual').innerText = training.id;
+                        document.getElementById('popup-date-individual').innerText = training.date;
+                        document.getElementById('popup-time-individual').innerText = training.startHour + ' - ' + training.endHour;
+                        document.getElementById('popup-room-individual').innerText = training.room;
+                        document.getElementById('popup-type-individual').innerText = training.type;
+                        document.getElementById('popup-client').innerText = training.client;
+                        document.getElementById('popup-goal').innerText = training.goal;
+                        document.getElementById('popup-entries').innerText = training.numberOfEntries;
+                        document.getElementById('popup-report').value = training.report;
+                        document.getElementById('reservationId').value = training.reservationId;
+
+                        document.getElementById('individual-details').style.display = "block";
+                        document.getElementById('group-details').style.display = "none";
+                    } else if (training.type === "GROUP") {
+                        document.getElementById('popup-id-group').innerText = training.id;
+                        document.getElementById('popup-date-group').innerText = training.date;
+                        document.getElementById('popup-time-group').innerText = training.startHour + ' - ' + training.endHour;
+                        document.getElementById('popup-room-group').innerText = training.room;
+                        document.getElementById('popup-type-group').innerText = training.type;
+                        document.getElementById('popup-group-size').innerText = training.groupSize;
+                        document.getElementById('popup-level').innerText = training.level;
+
+                        document.getElementById('individual-details').style.display = "none";
+                        document.getElementById('group-details').style.display = "block";
+                    }
+
+                    popup.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Błąd pobierania szczegółów treningu:', error);
+                    alert('Nie udało się pobrać szczegółów treningu.');
+                });
+        });
+    });
+
+    function saveReport() {
+        const report = document.getElementById('popup-report').value;
+        const id = document.getElementById('reservationId').value;
+
+        fetch(`/coach/trening/${id}/raport`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ report }),
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Raport został zapisany.');
+                } else {
+                    alert('Wystąpił problem z zapisem raportu.');
+                }
+            })
+            .catch(error => {
+                console.error('Błąd podczas zapisywania raportu:', error);
+                alert('Nie udało się zapisać raportu.');
+            });
+    }
+</script>
+</body>
+</html>
