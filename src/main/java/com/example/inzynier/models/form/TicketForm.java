@@ -11,5 +11,6 @@ public class TicketForm {
 
     private Ticket ticket;
     private TicketType ticketType;
+    private boolean hasTrainings;
 
 }

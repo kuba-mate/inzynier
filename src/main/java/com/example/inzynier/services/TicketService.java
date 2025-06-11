@@ -6,11 +6,16 @@ import com.example.inzynier.models.dto.TrainingManagerDtoHelper;
 import com.example.inzynier.models.dto.TraningManagerDto;
 import com.example.inzynier.models.enums.SportType;
 import com.example.inzynier.models.enums.TicketType;
+import com.example.inzynier.models.exception.GroupTicketAkreadyTakenException;
+import com.example.inzynier.models.exception.MaxOneGymTicketException;
+import com.example.inzynier.models.exception.MaxOneIndividualTicketException;
+import com.example.inzynier.models.exception.NotAStudentException;
 import com.example.inzynier.repositories.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -80,9 +85,12 @@ public class TicketService {
         }
     }
 
-    private void saveGroupTicketReservation(final Long ticketId, final Client client){
+    private void saveGroupTicketReservation(final Long ticketId, final Client client) throws Exception {
         final GroupTicket groupTicket = groupTicketRepository.findById(ticketId).get();
-        Reservation reservation = new Reservation();
+        if(!validateGroupTicketReservation(client, ticketId)){
+            throw new GroupTicketAkreadyTakenException();
+        }
+        final Reservation reservation = new Reservation();
         reservation.setEndDate(LocalDate.now().plusMonths(1));
         reservation.setClient(client);
         reservation.setNumberOfEntriesLeft(null);
@@ -97,7 +105,10 @@ public class TicketService {
     private void saveGymTicketReservation(final Long ticketId, final Client client) throws Exception {
         final GymTicket gymTicket = gymTicketRepository.getReferenceById(ticketId);
         if(gymTicket.isOnlyStudent() && !client.getIsStudent()){
-            throw new Exception();
+            throw new NotAStudentException();
+        }
+        if(!validateGymTicketReservation(client)){
+            throw new MaxOneGymTicketException();
         }
         final Reservation reservation = new Reservation();
         reservation.setEndDate(LocalDate.now().plusMonths(1));
@@ -107,10 +118,39 @@ public class TicketService {
         reservationRepository.save(reservation);
     }
 
+    private boolean validateGymTicketReservation(final Client client){
+        final List<Reservation> reservations = reservationRepository.getReservationsByClientAndNumberOfEntriesLeftNullAndEndDateIsAfter(client, LocalDate.now());
+        for (final Reservation reservation : reservations){
+            final TicketType ticketType = checkTicketsType(reservation.getTicket().getId());
+            if(ticketType.equals(TicketType.GYM)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Boolean validateIndividualReservations(final Client client){
+        final Reservation reservation = reservationRepository.getReservationByClientAndNumberOfEntriesLeftGreaterThan(client, 0);
+        if(reservation != null){
+            return false;
+        }
+        return true;
+    }
+
+    private Boolean validateGroupTicketReservation(final Client client, final Long ticketId){
+        final List<Reservation> reservations = reservationRepository.getReservationsByClientAndNumberOfEntriesLeftNullAndEndDateIsAfter(client, LocalDate.now());
+        for (final Reservation reservation : reservations){
+            if(ticketId.equals(reservation.getTicket().getId())){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void saveNonPeriodicReservation(final IndividualTicket individualTicket, final HttpServletRequest request, final IndividualTraining individualTraining) throws Exception {
         final Client client = (Client) request.getSession().getAttribute("user");
         if(!validateIndividualReservations(client)){
-            throw new Exception();
+            throw new MaxOneIndividualTicketException();
         }
         final Reservation reservation = new Reservation();
         final LocalDateTime startDate = individualTraining.getStartDate();
@@ -152,19 +192,19 @@ public class TicketService {
         return trainingManagerDtoHelper;
     }
 
-    public IndividualTraining prepareIndividualTraining(final Long ticketId, final Long selectedCoach, final String trainingDate, final String trainingGoal, final HttpServletRequest request){
+    public IndividualTraining prepareIndividualTraining(final Long ticketId, final Long selectedCoach, final String trainingDate, final String trainingGoal, final Long roomId, final HttpServletRequest request){
         final Client client = (Client) request.getSession().getAttribute("user");
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         final LocalDateTime formattedTrainingDate = LocalDateTime.parse(trainingDate, formatter);
         final SportType ticketsSportType = ticketRepository.getTicketById(ticketId).getSportDiscipline().getSportType();
-        final List<Room> rooms = roomRepository.getRoomsBySportType(ticketsSportType);
+        final Room room = roomRepository.getReferenceById(roomId);
         final IndividualTraining individualTraining = new IndividualTraining();
         individualTraining.setCoach(coachRepository.getCoachById(selectedCoach));
         individualTraining.setStartDate(formattedTrainingDate);
         individualTraining.setEndDate(formattedTrainingDate.plusHours(1));
         individualTraining.setClientsGoal(trainingGoal);
         individualTraining.setClient(client);
-        individualTraining.setRoom(rooms.get(0));
+        individualTraining.setRoom(room);
         return individualTraining;
     }
 
@@ -173,23 +213,17 @@ public class TicketService {
         final List<GroupTicket> groupTickets = findAllGroupTickets();
         for(GroupTicket groupTicket : groupTickets) {
             final List<GroupTraining> groupTrainings = groupTrainingRepository.getGroupTrainingsByGroupTicket(groupTicket);
-            final Coach coach = groupTrainings.get(0).getCoach();
-            final Room room = groupTrainings.get(0).getRoom();
-            groupTicketFormList.add(GroupTicketForm.builder()
-                    .groupTicket(groupTicket)
-                    .groupTrainings(groupTrainings)
-                    .coach(coach)
-                    .room(room).build());
+            if (!groupTrainings.isEmpty()) {
+                final Coach coach = groupTrainings.get(0).getCoach();
+                final Room room = groupTrainings.get(0).getRoom();
+                groupTicketFormList.add(GroupTicketForm.builder()
+                        .groupTicket(groupTicket)
+                        .groupTrainings(groupTrainings)
+                        .coach(coach)
+                        .room(room).build());
+            }
         }
         return groupTicketFormList;
-    }
-
-    private Boolean validateIndividualReservations(final Client client){
-        final Reservation reservation = reservationRepository.getReservationByClientAndNumberOfEntriesLeftGreaterThan(client, 0);
-        if(reservation != null){
-            return false;
-        }
-        return true;
     }
 
     private TicketType checkTicketsType(final Long ticketId){
@@ -240,12 +274,13 @@ public class TicketService {
         return null;
     }
 
-    public Boolean validateTrainingInfo(final Long selectedCoach, final String trainingDate){
+    public Long validateTrainingInfo(final Long selectedCoach, final String trainingDate){
         final Coach coach = coachRepository.getCoachById(selectedCoach);
+        final SportType ticketsSportType = coach.getSportDiscipline().getSportType();
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         final LocalDateTime formattedTrainingDate = LocalDateTime.parse(trainingDate, formatter);
         if(formattedTrainingDate.isAfter(LocalDate.now().plusMonths(1).atStartOfDay())){
-            return false;
+            return -1L;
         }
         final List<Training> trainings = trainingRepository.getTrainingsByCoach(coach);
         final List<LocalDateTime> startTrainingDates = new ArrayList<>();
@@ -260,10 +295,36 @@ public class TicketService {
             final LocalDateTime endDate = endTrainingDates.get(i);
 
             if (!formattedTrainingDate.isBefore(startDate) && !formattedTrainingDate.isAfter(endDate)) {
-                return false;
+                return -2L;
             }
         }
-        return true;
+        List<Room> rooms;
+        if (SportType.GYM.equals(ticketsSportType)) {
+            rooms = roomRepository.getRoomsBySportType(ticketsSportType);
+        } else {
+            rooms = roomRepository.getRoomsBySportTypeIsIn(List.of(ticketsSportType, SportType.MARTIAL_ARTS));
+        }
+        for (final Room room : rooms) {
+            final List<Training> allTrainings = trainingRepository.getTrainingsByRoom(room);
+            Boolean isAvailable = true;
+            final List<LocalDateTime> startAllTrainingDates = new ArrayList<>();
+            final List<LocalDateTime> endAllTrainingDates = new ArrayList<>();
+            for (final Training training : allTrainings) {
+                startAllTrainingDates.addAll(getAllDatesForDayAndTime(training.getTrainingDay(), training.getStartHour()));
+                endAllTrainingDates.addAll(getAllDatesForDayAndTime(training.getTrainingDay(), training.getEndHour()));
+            }
+            for (int i = 0; i < startAllTrainingDates.size(); i++) {
+                final LocalDateTime startDate = startAllTrainingDates.get(i);
+                final LocalDateTime endDate = endAllTrainingDates.get(i);
+
+                if (!formattedTrainingDate.isBefore(startDate) && !formattedTrainingDate.isAfter(endDate)) {
+                    isAvailable = false;
+                }
+            }
+            if (isAvailable)
+                return room.getRoom_id();
+        }
+        return -3L;
     }
 
     public static List<LocalDateTime> getAllDatesForDayAndTime(final String day, final String startHour) {

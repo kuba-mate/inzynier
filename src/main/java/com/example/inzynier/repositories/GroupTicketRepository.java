@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface GroupTicketRepository extends JpaRepository<GroupTicket,Long> {
     List<GroupTicket> findGroupTicketsBySportDiscipline_SportType(final SportType sportType);
+    GroupTicket getGroupTicketByName(String name);
 }

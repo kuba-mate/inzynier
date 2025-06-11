@@ -11,6 +11,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> getReservationsByClientAndNumberOfEntriesLeftNotNullAndNumberOfEntriesLeftNot(final Client client, final Integer value);
     List<Reservation> getReservationsByClientAndNumberOfEntriesLeftEquals(final Client client, final Integer value);
     List<Reservation> getReservationsByClientAndNumberOfEntriesLeftNull(final Client client);
+
+    List<Reservation> getReservationsByClientAndNumberOfEntriesLeftNullAndEndDateIsAfter(final Client client, final LocalDate now);
     Reservation getReservationByClientAndNumberOfEntriesLeftGreaterThan(final Client client, final Integer value);
     int deleteByEndDateBefore(LocalDate date);
 

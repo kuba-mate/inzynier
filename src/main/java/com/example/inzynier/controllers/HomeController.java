@@ -2,9 +2,12 @@ package com.example.inzynier.controllers;
 
 import com.example.inzynier.models.Client;
 import com.example.inzynier.models.dto.MyAccountDto;
+import com.example.inzynier.models.exception.*;
 import com.example.inzynier.services.HomeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,9 +75,19 @@ public class HomeController {
     }
 
     @PostMapping("/edycja-profilu")
-    public String editProfile(@ModelAttribute final Client client, final HttpServletRequest request) {
-        homeService.editProfile(client, request);
-        return "redirect:/my_account";
+    public ResponseEntity<String> editProfile(@ModelAttribute final Client client, final HttpServletRequest request) {
+        try {
+            homeService.editProfile(client, request);
+        } catch (WrongLoginPasswordException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login lub hasło są zbyt krótkie");
+        } catch (WrongEmailException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Adres email nie spełnia wymaganego formatu");
+        } catch (WrongPhoneNumberException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Numer telefonu nie spełnia wymaganego formatu");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Użytkownik z takim loginem już istnieje");
+        }
+        return ResponseEntity.ok("redirect:/my_account");
     }
 
     @GetMapping("/brak-dostepu")

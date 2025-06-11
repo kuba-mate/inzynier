@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "group_training")
-public class GroupTraining extends Training{
+public class GroupTraining extends Training {
 
     private Integer groupSize;
 

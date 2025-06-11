@@ -11,7 +11,6 @@
             $("#registerForm").on("submit", function(event) {
                 event.preventDefault();
 
-                var login = $("#username").val();
                 var password = $("#password").val();
                 var confirmPassword = $("#confirm-password").val();
 
@@ -20,19 +19,26 @@
                     return;
                 }
 
-                $.ajax({
-                    url: "/api/checkLogin",
-                    type: "GET",
-                    data: { login: login },
-                    success: function(response) {
-                        if (response) {
-                            $("#error-message").text("Użytkownik z danym loginem już istnieje").show();
-                            $("#username").val("").focus();
+                const formData = new FormData(this);
+
+                fetch('/api/checkLogin', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            document.getElementById('registerForm').submit();
                         } else {
-                            $("#registerForm")[0].submit();
+                            return response.text().then(errorMessage => {
+                                $("#error-message").text(errorMessage).show();
+                                $("#username").val("").focus();
+                            });
                         }
-                    }
-                });
+                    })
+                    .catch(error => {
+                        console.error('Błąd podczas sprawdzania loginu:', error);
+                        alert('Nie udało się sprawdzić loginu. Sprawdź połączenie internetowe.');
+                    });
             });
         });
     </script>

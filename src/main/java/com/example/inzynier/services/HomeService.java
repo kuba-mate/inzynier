@@ -5,10 +5,11 @@ import com.example.inzynier.models.Client;
 import com.example.inzynier.models.dto.ClientsPlansDto;
 import com.example.inzynier.models.dto.GroupReservationDto;
 import com.example.inzynier.models.dto.MyAccountDto;
-import com.example.inzynier.repositories.ClientRepository;
-import com.example.inzynier.repositories.GroupTicketRepository;
-import com.example.inzynier.repositories.GroupTrainingRepository;
-import com.example.inzynier.repositories.ReservationRepository;
+import com.example.inzynier.models.exception.LoginNotUniqueException;
+import com.example.inzynier.models.exception.WrongEmailException;
+import com.example.inzynier.models.exception.WrongLoginPasswordException;
+import com.example.inzynier.models.exception.WrongPhoneNumberException;
+import com.example.inzynier.repositories.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,23 +30,47 @@ public class HomeService {
     private GroupTicketRepository groupTicketRepository;
     @Autowired
     private GroupTrainingRepository groupTrainingRepository;
+    @Autowired
+    private PersonRepository personRepository;
 
-    public void addNewPersonToDatabase(Client client) {
+    public void addNewPersonToDatabase(final Client client) {
         clientRepository.save(client);
     }
 
-    public void editProfile(final Client newClientInfo, final HttpServletRequest request) {
+    public void editProfile(final Client newClientInfo, final HttpServletRequest request) throws Exception {
         final Client oldClientInfo = (Client) request.getSession().getAttribute("user");
-        if (newClientInfo.getLogin() != null && !newClientInfo.getLogin().equals(oldClientInfo.getLogin())) {
+        if (!oldClientInfo.getLogin().equals(newClientInfo.getLogin())) {
+            if (newClientInfo.getLogin() == null || newClientInfo.getLogin().length() < 3) {
+                throw new WrongLoginPasswordException();
+            }
+            final List<Person> persons = personRepository.findAll();
+            for (final Person person : persons) {
+                if (person.getLogin().equals(newClientInfo.getLogin())) {
+                    throw new LoginNotUniqueException();
+                }
+            }
             oldClientInfo.setLogin(newClientInfo.getLogin());
         }
-        if (newClientInfo.getPassword() != null && !newClientInfo.getPassword().equals(oldClientInfo.getPassword())) {
+        if (!oldClientInfo.getPassword().equals(newClientInfo.getPassword())) {
+            if (newClientInfo.getPassword() == null || newClientInfo.getPassword().length() < 3) {
+                throw new WrongLoginPasswordException();
+            }
             oldClientInfo.setPassword(newClientInfo.getPassword());
         }
-        if (newClientInfo.getEmail() != null && !newClientInfo.getEmail().equals(oldClientInfo.getEmail())) {
+        if (!oldClientInfo.getEmail().equals(newClientInfo.getEmail())) {
+            final String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+            final String email = newClientInfo.getEmail();
+            if (email == null || !email.matches(emailRegex)) {
+                throw new WrongEmailException();
+            }
             oldClientInfo.setEmail(newClientInfo.getEmail());
         }
-        if (newClientInfo.getPhoneNumber() != null && !newClientInfo.getPhoneNumber().equals(oldClientInfo.getPhoneNumber())) {
+        if (!oldClientInfo.getPhoneNumber().equals(newClientInfo.getPhoneNumber())) {
+            final String phoneNumber = newClientInfo.getPhoneNumber();
+            final String phoneRegex = "^\\+?[0-9]{9,15}$";
+            if (phoneNumber == null || !phoneNumber.matches(phoneRegex)) {
+                throw new WrongPhoneNumberException();
+            }
             oldClientInfo.setPhoneNumber(newClientInfo.getPhoneNumber());
         }
         if (newClientInfo.getAddress() != null && !newClientInfo.getAddress().equals(oldClientInfo.getAddress())) {

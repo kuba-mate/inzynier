@@ -25,7 +25,6 @@
             <table>
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Data</th>
                     <th>Godzina start-koniec</th>
                     <th>Sala</th>
@@ -35,7 +34,6 @@
                 </thead>
                 <tbody>
                 <tr th:each="training : ${trainings}">
-                    <td th:text="${training.id}"></td>
                     <td th:text="${training.date}"></td>
                     <td th:text="${training.startHour + ' - ' + training.endHour}"></td>
                     <td th:text="${training.room}"></td>
@@ -54,7 +52,6 @@
         <h2>Szczegóły Treningu</h2>
 
         <div id="individual-details" style="display: none;">
-            <p><strong>ID:</strong> <span id="popup-id-individual"></span></p>
             <p><strong>Data:</strong> <span id="popup-date-individual"></span></p>
             <p><strong>Godzina:</strong> <span id="popup-time-individual"></span></p>
             <p><strong>Sala:</strong> <span id="popup-room-individual"></span></p>
@@ -69,13 +66,12 @@
         </div>
 
         <div id="group-details" style="display: none;">
-            <p><strong>ID:</strong> <span id="popup-id-group"></span></p>
             <p><strong>Data:</strong> <span id="popup-date-group"></span></p>
             <p><strong>Godzina:</strong> <span id="popup-time-group"></span></p>
             <p><strong>Sala:</strong> <span id="popup-room-group"></span></p>
             <p><strong>Typ treningu:</strong> <span id="popup-type-group"></span></p>
-            <p><strong>Liczność grupy:</strong> <span id="popup-group-size"></span></p>
             <p><strong>Poziom zaawansowania:</strong> <span id="popup-level"></span></p>
+            <p><strong>Liczba osób zapisanych na zajęcia:</strong> <span id="popup-group-size"></span></p>
         </div>
     </div>
 </div>
@@ -102,7 +98,6 @@
                 .then(response => response.json())
                 .then(training => {
                     if (training.type === "INDIVIDUAL") {
-                        document.getElementById('popup-id-individual').innerText = training.id;
                         document.getElementById('popup-date-individual').innerText = training.date;
                         document.getElementById('popup-time-individual').innerText = training.startHour + ' - ' + training.endHour;
                         document.getElementById('popup-room-individual').innerText = training.room;
@@ -116,7 +111,6 @@
                         document.getElementById('individual-details').style.display = "block";
                         document.getElementById('group-details').style.display = "none";
                     } else if (training.type === "GROUP") {
-                        document.getElementById('popup-id-group').innerText = training.id;
                         document.getElementById('popup-date-group').innerText = training.date;
                         document.getElementById('popup-time-group').innerText = training.startHour + ' - ' + training.endHour;
                         document.getElementById('popup-room-group').innerText = training.room;

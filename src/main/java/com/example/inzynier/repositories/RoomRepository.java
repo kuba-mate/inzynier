@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> getRoomsBySportType(SportType sportType);
+
+    List<Room> getRoomsBySportTypeIsIn(List<SportType> sportTypes);
 }

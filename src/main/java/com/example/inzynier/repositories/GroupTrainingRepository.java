@@ -12,4 +12,5 @@ public interface GroupTrainingRepository extends JpaRepository<GroupTraining,Lon
     List<GroupTraining> getGroupTrainingsByGroupTicket(final GroupTicket groupTicket);
     List<GroupTraining> findAllByCoach(Coach coach);
 
+    boolean existsByGroupTicket(GroupTicket groupTicket);
 }

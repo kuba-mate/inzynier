@@ -206,7 +206,7 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 0 5px rgba(38, 66, 139, 0.5);
 }
 
-.delete-button, .add-button, .info-button {
+.delete-button, .add-button, .info-button, .edit-button {
     background-color: #26428b;
     color: white;
     border: none;
@@ -217,7 +217,40 @@ input:focus, textarea:focus, select:focus {
     transition: background-color 0.3s;
 }
 
-.delete-button:hover, .add-button:hover, .info-button:hover {
+.delete-button:hover, .add-button:hover, .info-button:hover, .edit-button:hover {
     background-color: #e6b800;
     color: #26428b;
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    color: red;
+}
+
+.tooltip-container .tooltip-text {
+    visibility: hidden;
+    background-color: #f44336;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    min-width: 250px;
+    max-width: 300px;
+    white-space: normal;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-size: 13px;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }

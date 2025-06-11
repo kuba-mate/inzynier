@@ -3,6 +3,10 @@ package com.example.inzynier.controllers;
 import com.example.inzynier.models.*;
 import com.example.inzynier.models.dto.GroupTicketForm;
 import com.example.inzynier.models.dto.TraningManagerDto;
+import com.example.inzynier.models.exception.GroupTicketAkreadyTakenException;
+import com.example.inzynier.models.exception.MaxOneGymTicketException;
+import com.example.inzynier.models.exception.MaxOneIndividualTicketException;
+import com.example.inzynier.models.exception.NotAStudentException;
 import com.example.inzynier.repositories.IndividualTicketRepository;
 import com.example.inzynier.services.TicketService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -93,20 +98,29 @@ public class TicketController {
                                               @RequestParam(name = "selectedCoach", required = false) final Long selectedCoach,
                                               @RequestParam(name = "trainingDate", required = false) final String trainingDate,
                                               @RequestParam(name = "trainingGoal", required = false) final String trainingGoal,
+                                              @RequestParam(name = "hiddenAvailable", required = false) final Long availableRoomId,
                                               final HttpServletRequest request) {
         if(selectedCoach == null && trainingDate.isEmpty() && trainingGoal.isEmpty()){
             try {
                 ticketService.saveReservation(ticketId, request, null);
-            } catch (Exception e) {
+            } catch (MaxOneGymTicketException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Można mieć maksymalnie 1 aktywny karnet na siłownie");
+            } catch (GroupTicketAkreadyTakenException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Nie można mieć dwóch takich samych aktywnych karnetów");
+            } catch (NotAStudentException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Aby zarezerwować ten karnet potrzebny jest status studenta");
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Wystąpił błąd");
             }
             return ResponseEntity.ok("redirect:/");
         } else {
-            final IndividualTraining individualTraining = ticketService.prepareIndividualTraining(ticketId, selectedCoach, trainingDate, trainingGoal, request);
+            final IndividualTraining individualTraining = ticketService.prepareIndividualTraining(ticketId, selectedCoach, trainingDate, trainingGoal, availableRoomId, request);
             try {
                 ticketService.saveReservation(ticketId, request, individualTraining);
+            } catch (MaxOneIndividualTicketException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Można mieć maksymalnie 1 aktywną indywidualną rezerwacje");
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Można mieć maksymalnie 1 indywidualną rezerwacje");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Wystąpił błąd");
             }
             return ResponseEntity.ok("redirect:/");
         }
@@ -117,14 +131,14 @@ public class TicketController {
             @RequestParam("selectedCoach") final Long selectedCoach,
             @RequestParam("trainingDate") final String trainingDate) {
 
-        boolean isAvailable = validateTrainingInfo(selectedCoach, trainingDate);
+        Long isAvailable = validateTrainingInfo(selectedCoach, trainingDate);
 
         final Map<String, Object> response = new HashMap<>();
         response.put("available", isAvailable);
         return ResponseEntity.ok(response);
     }
 
-    private Boolean validateTrainingInfo(final Long selectedCoach, final String trainingDate){
+    private Long validateTrainingInfo(final Long selectedCoach, final String trainingDate){
         return ticketService.validateTrainingInfo(selectedCoach, trainingDate);
     }
 

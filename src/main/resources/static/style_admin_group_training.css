@@ -81,7 +81,7 @@ table tr:hover {
     background-color: #ddd;
 }
 
-.delete-button, .add-button, .info-button {
+.delete-button, .add-button, .info-button, .edit-button {
     background-color: #26428b;
     color: white;
     border: none;
@@ -92,7 +92,7 @@ table tr:hover {
     transition: background-color 0.3s;
 }
 
-.delete-button:hover, .add-button:hover, .info-button:hover {
+.delete-button:hover, .add-button:hover, .info-button:hover, .edit-button:hover {
     background-color: #e6b800;
     color: #26428b;
 }
@@ -176,6 +176,16 @@ table tr:hover {
     background-color: #e6b800;
     color: #26428b;
     transform: scale(1.05);
+}
+
+form input,
+form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 .close-button {

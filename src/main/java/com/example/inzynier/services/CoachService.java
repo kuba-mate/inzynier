@@ -31,7 +31,7 @@ public class CoachService {
         final List<GroupTraining> groupTrainings = groupTrainingRepository.findAllByCoach(coach);
         for(final IndividualTraining individualTraining : individualTrainings){
             final Reservation reservation = reservationRepository.getReservationByClientAndNumberOfEntriesLeftGreaterThan(individualTraining.getClient(), 0);
-            if(reservation != null) {
+            if(reservation != null && individualTraining.getEndDate().isAfter(LocalDateTime.now())) {
                 trainingMonitorForms.add(TrainingMonitorForm.builder()
                         .id(individualTraining.getTraining_id())
                         .date(formatIndividualTrainingFormatDate(individualTraining.getStartDate()))

@@ -39,7 +39,7 @@ public class CoachController {
     }
 
     @PostMapping("/trening/{id}/raport")
-    public ResponseEntity<String> addRaport(@PathVariable final Long id, @RequestBody Map<String, String> payload){
+    public ResponseEntity<String> addRaport(@PathVariable final Long id, @RequestBody final Map<String, String> payload){
         final String report = payload.get("report");
         final Boolean saved = coachService.saveRaport(id, report);
         if(saved){

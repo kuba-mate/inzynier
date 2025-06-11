@@ -5,6 +5,7 @@
   <title>Rezerwacja Karnetu</title>
   <link rel="stylesheet" th:href="@{/style_reservation.css}">
   <script>
+
     function validateForm() {
       var checkboxes = document.querySelectorAll('.agreements input[type="checkbox"]');
       for (var i = 0; i < checkboxes.length; i++) {
@@ -29,6 +30,8 @@
 
     function submitForm(event) {
       event.preventDefault();
+      const available = localStorage.getItem("available");
+      document.getElementById("hiddenAvailable").value = available;
 
       if (!validateForm()) {
         return;
@@ -91,6 +94,7 @@
       <input type="hidden" id="hiddenSelectedCoach" name="selectedCoach" th:value="${selectedCoach}"/>
       <input type="hidden" id="hiddenTrainingDate" name="trainingDate" th:value="${trainingDate}"/>
       <input type="hidden" id="hiddenTrainingGoal" name="trainingGoal" th:value="${trainingGoal}"/>
+      <input type="hidden" id="hiddenAvailable" name="hiddenAvailable" value=""/>
       <button type="submit">Zarezerwuj</button>
     </form>
   </main>
