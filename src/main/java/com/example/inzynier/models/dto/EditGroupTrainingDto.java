@@ -18,8 +18,8 @@ public class EditGroupTrainingDto {
     @JsonProperty("endHour")
     private String endHour;
 
-    @JsonProperty("coach")
-    private String coach;
+    @JsonProperty("coaches")
+    private Long coaches;
 
     @JsonProperty("ticket")
     private String ticket;

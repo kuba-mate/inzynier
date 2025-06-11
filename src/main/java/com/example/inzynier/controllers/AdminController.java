@@ -43,6 +43,8 @@ public class AdminController {
     private TicketRepository ticketRepository;
     @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private SportDisciplineRepository sportDisciplineRepository;
 
     private static final Map<String, Integer> DAY_ORDER = Map.of(
             "poniedziałek", 1,
@@ -194,6 +196,7 @@ public class AdminController {
                 "lastName", training.getCoach().getLastName()
         ));
         response.put("sportDiscipline", training.getCoach().getSportDiscipline().getName());
+        response.put("sportType", training.getCoach().getSportDiscipline().getSportType());
         response.put("room", training.getRoom().getRoom_id());
         response.put("ticket", training.getGroupTicket().getName());
         response.put("currentGroupSize", training.getGroupSize());
@@ -229,6 +232,19 @@ public class AdminController {
                         .price(ticket.getPrice())
                         .build()));
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/pobierz-trenerow")
+    @ResponseBody
+    public ResponseEntity<List<Coach>> getRooms(@RequestParam final SportType sportType,
+                                                @RequestParam final String coachName, @RequestParam final String coachLastName) {
+        final SportDiscipline sportDiscipline = sportDisciplineRepository.getSportDisciplineBySportType(sportType);
+        final List<Coach> coaches = coachRepository.getCoachesBySportDisciplineIsIn(List.of(sportDiscipline));
+        coaches.removeIf(coach ->
+                coach.getName().equalsIgnoreCase(coachName) &&
+                        coach.getLastName().equalsIgnoreCase(coachLastName)
+        );
+        return ResponseEntity.ok(coaches);
     }
 
     @GetMapping("/brak-dostepu")

@@ -142,8 +142,14 @@
             </p>
 
             <p>
-                <label for="input-coach"><strong>Trener:</strong></label>
-                <input type="text" id="input-coach" name="coach" >
+                <input type="hidden" id="input-coach" name="coach" >
+            </p>
+
+            <p>
+                <label for="coaches"><strong>Trener:</strong></label>
+                <select id="coaches" name="coaches" required>
+                    <option value="" disabled selected>Wybierz karnet</option>
+                </select>
             </p>
 
             <p>
@@ -239,7 +245,7 @@
                     document.getElementById('input-day').value = training.trainingDay;
                     document.getElementById('input-startHour').value = training.startHour;
                     document.getElementById('input-endHour').value = training.endHour;
-                    document.getElementById('input-coach').value = training.coach.name + ' ' + training.coach.lastName;
+                    fetchCoaches(training.coach.name, training.coach.lastName, training.sportType);
                     document.getElementById('input-room').value = training.room;
                     document.getElementById('input-ticket').value = training.ticket;
                     editPopup.style.display = 'block';
@@ -346,6 +352,30 @@
             });
     }
 
+    function fetchCoaches(coachName, coachLastName, discipline) {
+        fetch(`/admin/pobierz-trenerow?sportType=${discipline}&coachName=${coachName}&coachLastName=${coachLastName}`)
+            .then(response => response.json())
+            .then(coaches => {
+                const coachSelect = document.getElementById('coaches');
+                coachSelect.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.disabled = false;
+                defaultOption.selected = true;
+                defaultOption.value = '';
+                defaultOption.textContent = `${coachName} ${coachLastName}`;
+                coachSelect.appendChild(defaultOption);
+                coaches.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.id;
+                    option.textContent = `${c.name} ${c.lastName}`;
+                    coachSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Błąd podczas pobierania trenerów:', error);
+            });
+    }
+
     function fetchTickets(discipline) {
         fetch(`/admin/pobierz-karnet?sportType=${discipline}`)
             .then(response => response.json())
@@ -363,7 +393,6 @@
                 console.error('Błąd podczas pobierania karnetów:', error);
             });
     }
-
 
     const addTrainingForm = document.getElementById('add-training-form');
 

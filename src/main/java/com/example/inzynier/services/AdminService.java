@@ -324,15 +324,8 @@ public class AdminService {
             oldTrainingInfo.setEndHour(newTrainingInfo.getEndHour());
         }
 
-        if (newTrainingInfo.getCoach() != null && !newTrainingInfo.getCoach().equals(oldTrainingInfo.getCoach().getName())) {
-            final List<String> coachNameAndLastName = List.of(newTrainingInfo.getCoach().split(" "));
-            if (coachNameAndLastName.size() != 2) {
-                throw new CoachNotFoundException();
-            }
-            final Coach coach = coachRepository.getCoachByNameAndLastName(coachNameAndLastName.get(0), coachNameAndLastName.get(1));
-            if (coach == null) {
-                throw new CoachNotFoundException();
-            }
+        if (newTrainingInfo.getCoaches() != null && !newTrainingInfo.getCoaches().equals(oldTrainingInfo.getCoach().getId())) {
+            final Coach coach = coachRepository.getCoachById(newTrainingInfo.getCoaches());
             oldTrainingInfo.setCoach(coach);
         }
 
