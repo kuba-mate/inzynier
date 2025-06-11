@@ -5,7 +5,7 @@ FROM amazoncorretto:17
 WORKDIR /app
 
 # Kopiowanie pliku JAR do kontenera
-COPY target/inzynier-0.0.6-SNAPSHOT.jar app.jar
+COPY target/inzynier-0.0.7-SNAPSHOT.jar app.jar
 
 # Expose port aplikacji (Spring Boot domyślnie używa portu 8080)
 EXPOSE 8080
